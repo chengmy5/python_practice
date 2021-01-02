@@ -4,10 +4,16 @@
 # print(qualification)
 # f.close()
 import os
-a=os.path.exists('E:file')
-b=os.path.exists('E:/bidding_information')
+# a=os.path.exists('E:file')
+# b=os.path.exists('E:/bidding_information')
 # os.makedirs('E:/bidding_information')
-print(a)
-print(b)
+# print(a)
+# print(b)
+
+from shutil import copy
+
+copy('E:/file/aa.txt','E:/file2')
+
+
 
 
