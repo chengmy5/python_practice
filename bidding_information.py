@@ -85,10 +85,7 @@ def find_bidding_information():
     starting_time = '-'.join(date_arr)#获取当前时间的前一个月01号为起始时间
 
     url='http://txzb.miit.gov.cn/DispatchAction.do?reg=denglu&pagesize=1000'
-    # head={}
-    # head['User-Agent']='Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36'
     data={}
-
     data['inqu_status-0-name']=''#搜索标题
     data['inqu_status-0-date1']=starting_time#起始时间
     data['inqu_status-0-date2']=ending_time#结束时间

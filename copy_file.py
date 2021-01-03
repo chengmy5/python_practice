@@ -1,67 +1,69 @@
 import os
 import random
 from shutil import copy
+import openpyxl
 
-new_name=['广州开发区永茂西路搬迁D-ELH',
-'亨元村微网格综合接入机房2新建48芯上联光缆2',
-'姬堂村微网格综合接入机房1新建48芯上联光缆1',
-'广州开发区LG科学城厂区（搬迁）E-ELW',
-'广州开发区万科尚城E-ELW（优化）',
-'广州开发区黄埔海关技术用房E-ELW',
-'广州开发区永和禾丰（搬迁二）F-ELH',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远1）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远7）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远4）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远12）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远2）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远8）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远5）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远9）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远6）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远10）',
-'广州开发区大田山路D-ELH',
-'广州开发区官路山DC-EDH （拉远3）',
-'广州开发区官路山DC-EDH （拉远1）',
-'广州开发区东江大道南（搬迁）F-ELH',
-'广州开发区保利罗兰国际AE-ELW',
-'镇龙大道微网格综合接入机房1新建48芯上联光缆2',
-'镇龙大道微网格综合接入机房1新建48芯上联光缆1',
-'广州开发区牛鼻山隧道E-ELW（优化）（拉远1）',
-'广州开发区牛鼻山隧道E-ELW（优化）（拉远2）',
-'广州开发区牛鼻山隧道E-ELW（优化）（拉远3）',
-'万科东荟城（OLT下沉）（优化）',
-'广州开发区黄埔花园（搬迁）1E-ELW（拉远3）',
-]
-new_lenght=[0.812,
-1.502,
-2.76,
-1.218,
-1.268,
-0.558,
-0.2,
-0.68,
-0.507,
-0.568,
-0.73,
-0.73,
-0.558,
-0.629,
-0.253,
-0.456,
-0.253,
-1.725,
-0.698,
-0.568,
-0.832,
-0.253,
-0.12,
-0.466,
-0.568,
-1.218,
-1.928,
-0.355,
-0.66
-]
+
+# new_name=['广州开发区永茂西路搬迁D-ELH',
+# '亨元村微网格综合接入机房2新建48芯上联光缆2',
+# '姬堂村微网格综合接入机房1新建48芯上联光缆1',
+# '广州开发区LG科学城厂区（搬迁）E-ELW',
+# '广州开发区万科尚城E-ELW（优化）',
+# '广州开发区黄埔海关技术用房E-ELW',
+# '广州开发区永和禾丰（搬迁二）F-ELH',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远1）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远7）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远4）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远12）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远2）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远8）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远5）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远9）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远6）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远10）',
+# '广州开发区大田山路D-ELH',
+# '广州开发区官路山DC-EDH （拉远3）',
+# '广州开发区官路山DC-EDH （拉远1）',
+# '广州开发区东江大道南（搬迁）F-ELH',
+# '广州开发区保利罗兰国际AE-ELW',
+# '镇龙大道微网格综合接入机房1新建48芯上联光缆2',
+# '镇龙大道微网格综合接入机房1新建48芯上联光缆1',
+# '广州开发区牛鼻山隧道E-ELW（优化）（拉远1）',
+# '广州开发区牛鼻山隧道E-ELW（优化）（拉远2）',
+# '广州开发区牛鼻山隧道E-ELW（优化）（拉远3）',
+# '万科东荟城（OLT下沉）（优化）',
+# '广州开发区黄埔花园（搬迁）1E-ELW（拉远3）',
+# ]
+# new_lenght=[0.812,
+# 1.502,
+# 2.76,
+# 1.218,
+# 1.268,
+# 0.558,
+# 0.2,
+# 0.68,
+# 0.507,
+# 0.568,
+# 0.73,
+# 0.73,
+# 0.558,
+# 0.629,
+# 0.253,
+# 0.456,
+# 0.253,
+# 1.725,
+# 0.698,
+# 0.568,
+# 0.832,
+# 0.253,
+# 0.12,
+# 0.466,
+# 0.568,
+# 1.218,
+# 1.928,
+# 0.355,
+# 0.66
+# ]
 copy_name=['亨元村微网格综合接入机房1新建48芯上联光缆1', '坑围微网格综合接入机房1新建48芯上联光缆1', '夏园新圩微网格综合接入机房1新建48芯上联光缆1',
            '广州开发区万科城市之光E-ELW', '广州开发区中新知识城西F-ELH（优化）', '广州开发区九明地D-ELH', '广州开发区华盈商务大厦E-ELW',
            '广州开发区岭南学院东DC-EDH', '广州开发区岭南学院东DC-EFH', '广州开发区广州标致（搬迁）D-ELH', '广州开发区广州绿地城二期E-ELW',
@@ -87,49 +89,81 @@ def get_addr(list,old_path,new_flie,new_path):
         old_path_full=os.path.join(old_path,each)
         new_path_full=os.path.join(new_path,new_flie+'('+str(i)+').SOR')
         copy(old_path_full,new_path_full)
-        # print(old_path_full+'   '+new_path_full)
         i+=1
 
-def copy_update_excel(old_dir,new_dir,file_name,data1,data2):
-    print(old_dir+' '+new_dir+' '+file_name)
-    print(data1,data2)
-    pass
-def copy_file():
+def copy_update_excel(excels,old_dir,new_dir,file_name,data1,data2):
+    for each in excels:
+        if each[-4:]=='.xls':
+            if each[:6]=='1310-1':
+                zsh='总损耗 '+str(random.uniform(0.32, 0.3501))[:5]+'dB'
+                data3="%.5f" % data1
+                data4="%.5f" % (data1*10)
+                f = open(new_dir + each[:-4] + '.txt', 'w', encoding='utf-8')
+                f.write('文件名：' + file_name + '\n' + zsh + '\n' + str(data3) + 'km/Div' + '\n' + str(data4) + 'km')
+                f.close()
+            elif each[:6]=='1550-1':
+                zsh = '总损耗 ' + str(random.uniform(0.22, 0.2501))[:5] + 'dB'
+                data3="%.5f" % data2
+                data4="%.5f" % (data2*10)
+                f = open(new_dir + each[:-4] + '.txt', 'w', encoding='utf-8')
+                f.write('文件名：' + file_name + '\n' + zsh + '\n' + str(data3) + 'km/Div' + '\n' + str(data4) + 'km')
+                f.close()
+            old_path_full = os.path.join(old_dir, each)
+            copy(old_path_full,new_dir)
+
+def copy_file(dirname):
+    openname = 'E:\测试资料站点清单\\' + dirname + '测试资料.xlsx'
+    wb = openpyxl.load_workbook(openname)
+    ws = wb['Sheet1']
+    name = ws['A']
+    le = ws['B']
+
+    new_name = []
+    new_lenght = []
+    for n in name:
+        new_name.append(n.value)
+    for n in le:
+        new_lenght.append(n.value)
+    new_name.pop(0)
+    new_lenght.pop(0)
     for each in new_name:
         num=random.randint(0,32)
         #先创建文件夹
-        # os.makedirs('E:/ZTSJ-16/'+each+'/1310/1')
-        # os.makedirs('E:/ZTSJ-16/'+each+'/1310/2')
-        # os.makedirs('E:/ZTSJ-16/'+each+'/1550/1')
-        # os.makedirs('E:/ZTSJ-16/'+each+'/1550/2')
-        # #获取新创建的文件夹名称
-        # new_path_1310_1='E:/ZTSJ-16/'+each+'/1310/1'
-        # new_path_1310_2='E:/ZTSJ-16/'+each+'/1310/2'
-        # new_path_1550_1='E:/ZTSJ-16/'+each+'/1550/1'
-        # new_path_1550_2='E:/ZTSJ-16/'+each+'/1550/2'
-        #
-        # #获取要复制的文件列表
-        # old_1310_1=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1310/1/')
-        # old_path='E:/ZTSJ-05/'+copy_name[num]+'/1310/1/'
-        # get_addr(old_1310_1,old_path,each,new_path_1310_1)
-        # old_1310_2=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1310/2/')
-        # old_path = 'E:/ZTSJ-05/' + copy_name[num] + '/1310/2/'
-        # get_addr(old_1310_2, old_path, each, new_path_1310_2)
-        # old_1550_1=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1550/1/')
-        # old_path = 'E:/ZTSJ-05/' + copy_name[num] + '/1550/1/'
-        # get_addr(old_1550_1, old_path, each, new_path_1550_1)
-        # old_1550_2=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1550/2/')
-        # old_path = 'E:/ZTSJ-05/' + copy_name[num] + '/1550/2/'
-        # get_addr(old_1550_2, old_path, each, new_path_1550_2)
+        os.makedirs('E:/'+dirname+'/'+each+'/1310/1')
+        os.makedirs('E:/'+dirname+'/'+each+'/1310/2')
+        os.makedirs('E:/'+dirname+'/'+each+'/1550/1')
+        os.makedirs('E:/'+dirname+'/'+each+'/1550/2')
+        #获取新创建的文件夹名称
+        new_path_1310_1='E:/'+dirname+'/'+each+'/1310/1'
+        new_path_1310_2='E:/'+dirname+'/'+each+'/1310/2'
+        new_path_1550_1='E:/'+dirname+'/'+each+'/1550/1'
+        new_path_1550_2='E:/'+dirname+'/'+each+'/1550/2'
 
+        #获取要复制的文件列表
+        old_1310_1=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1310/1/')
+        old_path='E:/ZTSJ-05/'+copy_name[num]+'/1310/1/'
+        get_addr(old_1310_1,old_path,each,new_path_1310_1)
+        old_1310_2=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1310/2/')
+        old_path = 'E:/ZTSJ-05/' + copy_name[num] + '/1310/2/'
+        get_addr(old_1310_2, old_path, each, new_path_1310_2)
+        old_1550_1=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1550/1/')
+        old_path = 'E:/ZTSJ-05/' + copy_name[num] + '/1550/1/'
+        get_addr(old_1550_1, old_path, each, new_path_1550_1)
+        old_1550_2=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1550/2/')
+        old_path = 'E:/ZTSJ-05/' + copy_name[num] + '/1550/2/'
+        get_addr(old_1550_2, old_path, each, new_path_1550_2)
+
+        excels=os.listdir('E:/ZTSJ-05/' + copy_name[num] + '/')
         old_dir='E:/ZTSJ-05/' + copy_name[num] + '/'
-        new_dir='E:/ZTSJ-16/'+each+'/'
+        new_dir='E:/'+dirname+'/'+each+'/'
         flie_name=each+'.SOR'
 
         data1=new_lenght[new_name.index(each)]/copy_value_1310[num]
         data2=new_lenght[new_name.index(each)]/copy_value_1550[num]
-        copy_update_excel(old_dir,new_dir,flie_name,data1,data2)
+        copy_update_excel(excels,old_dir,new_dir,flie_name,data1,data2)
 
 
 if __name__=='__main__':
-    copy_file()
+    for i in os.listdir('E:\测试资料站点清单'):
+        dirname = i[:7]
+        copy_file(dirname)
