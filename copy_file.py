@@ -129,15 +129,15 @@ def copy_file(dirname):
     for each in new_name:
         num=random.randint(0,32)
         #先创建文件夹
-        os.makedirs('E:/'+dirname+'/'+each+'/1310/1')
-        os.makedirs('E:/'+dirname+'/'+each+'/1310/2')
-        os.makedirs('E:/'+dirname+'/'+each+'/1550/1')
-        os.makedirs('E:/'+dirname+'/'+each+'/1550/2')
+        os.makedirs('E:/测试资料/'+dirname+'/'+each+'/1310/1')
+        os.makedirs('E:/测试资料/'+dirname+'/'+each+'/1310/2')
+        os.makedirs('E:/测试资料/'+dirname+'/'+each+'/1550/1')
+        os.makedirs('E:/测试资料/'+dirname+'/'+each+'/1550/2')
         #获取新创建的文件夹名称
-        new_path_1310_1='E:/'+dirname+'/'+each+'/1310/1'
-        new_path_1310_2='E:/'+dirname+'/'+each+'/1310/2'
-        new_path_1550_1='E:/'+dirname+'/'+each+'/1550/1'
-        new_path_1550_2='E:/'+dirname+'/'+each+'/1550/2'
+        new_path_1310_1='E:/测试资料/'+dirname+'/'+each+'/1310/1'
+        new_path_1310_2='E:/测试资料/'+dirname+'/'+each+'/1310/2'
+        new_path_1550_1='E:/测试资料/'+dirname+'/'+each+'/1550/1'
+        new_path_1550_2='E:/测试资料/'+dirname+'/'+each+'/1550/2'
 
         #获取要复制的文件列表
         old_1310_1=os.listdir('E:/ZTSJ-05/'+copy_name[num]+'/1310/1/')
@@ -155,7 +155,7 @@ def copy_file(dirname):
 
         excels=os.listdir('E:/ZTSJ-05/' + copy_name[num] + '/')
         old_dir='E:/ZTSJ-05/' + copy_name[num] + '/'
-        new_dir='E:/'+dirname+'/'+each+'/'
+        new_dir='E:/测试资料/'+dirname+'/'+each+'/'
         flie_name=each+'.SOR'
 
         data1=new_lenght[new_name.index(each)]/copy_value_1310[num]
