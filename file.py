@@ -68,4 +68,24 @@ import random
 
 
 import os
-print(os.listdir('E:\测试资料站点清单'))
+# print(os.listdir('E:\测试资料站点清单'))
+# import requests
+# import bs4
+#
+#
+# url="https://b2b.10086.cn/b2b/main/showBiao!showZhaobiaoResult.html?page.currentPage=1&page.perPageSize=20&noticeBean.companyName=&noticeBean.title=&noticeBean.startDate=&noticeBean.endDate="
+# data = {}
+# data['page.currentPage']='1'
+# data['page.perPageSize']='20'
+# data['noticeBean.companyName']=''
+# data['noticeBean.title']=''
+# data['noticeBean.startDate']=''
+# data['noticeBean.endDate']=''
+# headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+#          'Referer': 'https://b2b.10086.cn/b2b/main/showBiao!preShowBiao.html?noticeType=list1'}
+# res = requests.post(url,data,verify=False,headers=headers)
+# soup = bs4.BeautifulSoup(res.text, 'html.parser')
+# print(soup)
+
+a=[2]
+print(len(a))
