@@ -4,7 +4,9 @@ import requests
 import bs4
 import os
 import datetime
-
+'''
+工信部
+'''
 def get_qualification():
     '''
     读取公司资质文档
