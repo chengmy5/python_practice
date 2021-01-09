@@ -5,7 +5,7 @@ import bs4
 import os
 import datetime
 '''
-中国电信-阳光采购网外部门户
+广东省机电设备招标中心
 '''
 def get_qualification():
     '''
@@ -24,9 +24,9 @@ def get_information(soup):
     :param soup: 要查找的页面
     :return: 招标公告地址列表、公告标题列表
     '''
-    targets=soup.find('table',class_='table_data').find_all('tr')
+    targets=soup.find_all('div',class_='border-dashed')
     information_address=[]#存放所有招标公告地址的列表
-    titles=[]#存放所有招标公告标题的列表
+    titles = []  # 存放所有招标公告标题的列表
     html=''
     for each in targets:
         # 遍历页面中所有包含招标公告标题的标签
@@ -34,14 +34,12 @@ def get_information(soup):
     a = html.find('<a href')#在字符串中找到所有a标签
     while a!=-1:
         #遍历所有a标签
-        b = str(html).find('>', a, a + 255)
+        b = html.find('"', a+12, a + 255)
         if b!=-1:
-            id=html[a + 27:html.find('\'',a+27)]#获取招标公告id
-            encryCode=html[b-35:b-3]#获取招标公告encryCode
-            title=html[html.find('>',a)+1:html.find('<',b+1)]#获取招标公告title
-            titles.append(title)
-            address='https://caigou.chinatelecom.com.cn/MSS-PORTAL/tenderannouncement/viewHome.do?encryCode='+encryCode+'&id='+id
+            address='https://www.gdebidding.com'+html[a + 9:b]#获取招标公告所在地址
             information_address.append(address)#将所有地址存到一个列表中
+            title=html[html.find('title',a)+7:html.find('"',a+60)]#获取招标公告title
+            titles.append(title)#将所有招标公告title存到一个列表中
         else:
             b=a+60
         a = str(html).find('<a href',b)
@@ -51,7 +49,7 @@ def get_information(soup):
 def open_bidding(bidding_informations,titles):
     qualification=get_qualification()# 获取公司资质文档
     #判断是否存在文件夹，如不存在则创建文件夹，以便存储文档
-    addr='E:/中国电信-阳光采购网外部门户招标公告/'
+    addr='E:/广东省机电设备招标公告/'
     if not os.path.exists(addr):
         os.makedirs(addr)
 
@@ -59,16 +57,15 @@ def open_bidding(bidding_informations,titles):
         url = each  #拼接请求地址
         #添加请求头
         headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
-                 'Cookie':'name=value; JSESSIONID=0000vh8DlP73tkX4eqxUIgdBfLc:18djc0hbi; CaiGouServiceInfo=!UeKxfQXs2xckSd6U9I+YAUGJNqjObN2UWqGq5KyNRwNLC2NrGbYQfnzPfjeqkru0yaCZ0CSWUgas7pc='}
+            'Cookie': 'JSESSIONID=B401DCA5686E1354B8DA790B46550AD4; _const_cas_from_=favicon.ico'}
         #发起请求
-        res = requests.post(url, verify=False, headers=headers)
+        res = requests.get(url, verify=False, headers=headers)
         #接收返回页面
         soup = bs4.BeautifulSoup(res.text, 'html.parser')
-        html=soup.text
         #获取投标人资格要求部分
-        content=html[html.find('投标人资格要求'):html.find('招标文件的获取')]
+        content = str(soup)
         #获取当前招标公告标题
-        title=titles[bidding_informations.index(each)]
+        title = titles[bidding_informations.index(each)]
         #当前招标公告中我司具有的资质列表
         has_qualification=[]
         for item in qualification:
@@ -80,47 +77,47 @@ def open_bidding(bidding_informations,titles):
         if len(has_qualification)>0:
             #如果当前招标公告中我司具有的资质列表长度大于0，则将此招标公告以html形式保存，并将当前招标公告中我司具有的资质列表以txt形式保存
             f = open(addr+title+'.html','w',encoding ='utf-8')  ##ffilename可以是原来的txt文件，也可以没有然后把写入的自动创建成txt文件
-            f.write(str(soup))
+            top=content[content.find('<div id="menu">'):content.find('</div>',content.find('<div id="manu">'))]
+            content=content.replace(top,'')
+            f.write(content)
             f.close()
             f = open(addr+ title + '_我司具有资质.txt', 'w', encoding='utf-8')
             f.write(str(has_qualification))
             f.close()
 
 def find_bidding_information():
-    # 先获得时间数组格式的日期
-    sevenDayAgo = (datetime.datetime.now() - datetime.timedelta(days=7))
-    # 转换为其他字符串格式
-    starting_time = sevenDayAgo.strftime('%Y-%m-%d')#获取七天前的日期作为起始时间
-    ending_time = time.strftime('%Y-%m-%d', time.localtime())#获取当前时间为终止时间
-
-    #请求地址  pagesize=每页展示条数
-    url='https://caigou.chinatelecom.com.cn/MSS-PORTAL/announcementjoin/list.do?provinceJT=NJT'
-    #请求参数
-    data={}
-    data['provinceJT']='NJT'#
-    data['docTitle']=''#公告名称
-    data['docCode']=''#公告编码
-    data['provinceCode']=''#省份编码
-    data['provinceNames']=''#省份名称
-    data['startDate']=''#创建开始日期
-    data['endDate']=''#创建结束日期
-    data['docType']='TenderAnnouncement'#公告类型   招标公告
-    data['paging.start']='1'#起始位置
-    data['paging.pageSize']='100'#每页条数
-    data['pageNum']='100'#每页条数
+    #请求地址
+    url='https://www.gdebidding.com/zbxxgg/index.jhtml'
     #请求头
     headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66',
-             'Cookie':'name=value; JSESSIONID=0000vh8DlP73tkX4eqxUIgdBfLc:18djc0hbi; CaiGouServiceInfo=!UeKxfQXs2xckSd6U9I+YAUGJNqjObN2UWqGq5KyNRwNLC2NrGbYQfnzPfjeqkru0yaCZ0CSWUgas7pc='}
+             'Cookie':'clientlanguage=zh_CN'}
     #发起请求
-    res = requests.post(url,data,verify=False,headers=headers)
+    res = requests.get(url,verify=False,headers=headers)
     #接收相应页面
     soup = bs4.BeautifulSoup(res.text, 'html.parser')
-    #在页面中查找各个招标公告
+    # 在页面中查找各个招标公告
     bidding_informations=get_information(soup)
-    # for each in bidding_informations:
-    #     print(each)
     #打开招标公告并判断是否符合公司具有资质
     open_bidding(bidding_informations[0],bidding_informations[1])
+    #获取招标公告最大页数
+    maxPage=soup.find('select',onchange="if(this.value==1){location='index.jhtml'}else{location='index_'+this.value+'.jhtml'}this.disabled='disabled'").find_all('option')[-1]['value']
+    page=2
+    while page<=int(maxPage):  #遍历所有页，从第2页开始
+        # 请求地址  page 第几页
+        url = 'https://www.gdebidding.com/zbxxgg/index_'+str(page)+'.jhtml'
+        # 请求头
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66',
+            'Cookie': 'clientlanguage=zh_CN'}
+        # 发起请求
+        res = requests.get(url, verify=False, headers=headers)
+        # 接收相应页面
+        soup = bs4.BeautifulSoup(res.text, 'html.parser')
+        # 在页面中查找各个招标公告
+        bidding_informations=get_information(soup)
+        #打开招标公告并判断是否符合公司具有资质
+        open_bidding(bidding_informations[0],bidding_informations[1])
+        page+=1
 
 if __name__=='__main__':
     find_bidding_information()

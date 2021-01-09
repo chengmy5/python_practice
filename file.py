@@ -86,6 +86,9 @@ import os
 # res = requests.post(url,data,verify=False,headers=headers)
 # soup = bs4.BeautifulSoup(res.text, 'html.parser')
 # print(soup)
+import re
 
-a=[2]
-print(len(a))
+a='	沙角A电厂2021年4、5号机组B、C级检修锅炉脱硝系统SCR第一层初装层催化剂更换工作项目（第二次招标）招标公告'
+regex=re.search("[^\u4e00-\u9fa5]",a)
+print('\t')
+print(a.replace(regex.group(),''))
