@@ -6,8 +6,15 @@ import os
 import datetime
 from selenium import webdriver
 import json
-import re
+import openpyxl
 requests.packages.urllib3.disable_warnings()#关闭安全警告
+
+dir='E:/招标公告/'#文件存储位置
+#创建excel文件，用于保存招标公告信息
+wb=openpyxl.Workbook()
+ws=wb.active
+ws.append(['序号','招标网站','项目名称','招标单位','项目概况','报名截止时间','资质要求','招标范围'])
+wb.save(dir+'每日招标信息'+time.strftime('%Y%m%d',time.localtime())+'.xlsx')
 
 def get_qualification():
     '''
@@ -35,7 +42,7 @@ class GongXinBu:
         '''
         从页面中获取并整理出所有招标公告的地址
         :param soup: 要查找的页面
-        :return: 招标公告地址列表
+        :return: 招标公告地址列表，公告标题
         '''
         targets=soup.find_all('td',class_='STYLE1')
         information_address=[]#存放所有招标公告地址的列表
@@ -61,13 +68,95 @@ class GongXinBu:
         return information_address,titles
 
     @staticmethod
+    def information(soup,serialNum,webName,title,has_qualification):
+        qualification=''
+        for each in has_qualification:
+            qualification+=each+','
+        # 招标单位
+        bidUnit = ''
+        #项目概况
+        projectOverview=''
+        #报名截止时间
+        endTime=''
+        #招标范围
+        bidScope=''
+        #存放公告信息的列表
+        information=[]
+        information.append(serialNum)
+        information.append(webName)
+        information.append(title)
+        # 获取招标人/招标代理机构
+        a = soup.find('span', style='font-size:16px;float:right; clear:both;')
+        if a == None:
+            a = soup.find('span', style='font-size: 16px;float:right; clear:both;')
+        if a != None:
+            bidUnit = a.text.split('：')[1]
+        information.append(bidUnit)
+        # 获取项目概况
+        b = soup.text.find('标段划分')
+        if b==-1:
+            b = soup.text.find('标包划分')
+        if b==-1:
+            b = soup.text.find('本项目划分')
+        if b==-1:
+            b = soup.text.find('不划分标包')
+        if b == -1:
+            b = soup.text.find('不划分标段')
+        c=soup.text.find('。', b, b + 60)
+        if c==-1:
+            c = soup.text.find('，', b, b + 60)
+        if c==-1:
+            c = soup.text.find(' ', b, b + 60)
+        if b!=-1:
+            projectOverview=soup.text[b:c]
+        information.append(projectOverview)
+        #获取报名截止时间
+        d=soup.text.find('投标截止时间为')
+        e=soup.text.find('。',d)
+        if d!=-1:
+            d=soup.text.find('2',d,d+15)
+            endTime=soup.text[d:e]
+        information.append(endTime)
+        information.append(qualification)
+        #获取招标范围
+        f=soup.text.find('招标内容:')
+        if f==-1:
+            f = soup.text.find('招标内容：')
+        if f==-1:
+            f = soup.text.find('招标范围:')
+        if f==-1:
+            f = soup.text.find('招标范围：')
+        if f==-1:
+            f = soup.text.find('采购内容:')
+        if f==-1:
+            f = soup.text.find('采购内容：')
+        if f==-1:
+            f = soup.text.find('项目主要内容：')
+        if f==-1:
+            f = soup.text.find('建设内容：')
+        if f==-1:
+            f = soup.text.find('招标规模及内容：')
+        if f==-1:
+            f = soup.text.find('项目概况：')
+        g=soup.text.find('。',f,f+255)
+        if f!=-1:
+            bidScope=soup.text[f:g]
+        information.append(bidScope)
+        return information
+    @staticmethod
     def open_bidding(bidding_informations,titles):
         qualification=get_qualification()# 获取公司资质文档
         #判断是否存在文件夹，如不存在则创建文件夹，以便存储文档
-        addr='E:/招标公告/工信部招标公告/'
+        addr=dir+'工信部招标公告/'
         if not os.path.exists(addr):
             os.makedirs(addr)
-
+        #打开excel表，准备进行数据写入
+        wb=openpyxl.open(dir+'每日招标信息'+time.strftime('%Y%m%d',time.localtime())+'.xlsx')
+        ws=wb.active
+        # 序号，从1开始
+        serialNum = 1
+        #网站
+        webName='工信部'
         JSESSIONID='&JSESSIONID=B401DCA5686E1354B8DA790B46550AD4'#招标公告请求地址中的参数
         for each in bidding_informations:
             # 获取当前招标公告标题
@@ -97,16 +186,21 @@ class GongXinBu:
 
             if len(has_qualification)>0:
                 #如果当前招标公告中我司具有的资质列表长度大于0，则将此招标公告以html形式保存，并将当前招标公告中我司具有的资质列表以txt形式保存
-                f = open(addr+title+'.html','w',encoding ='utf-8')  ##ffilename可以是原来的txt文件，也可以没有然后把写入的自动创建成txt文件
-                f.write(str(soup))
-                f.close()
-                f = open(addr+ title + '_我司具有资质.txt', 'w', encoding='utf-8')
-                f.write(str(has_qualification))
-                f.close()
+                # f = open(addr+title+'.html','w',encoding ='utf-8')  ##ffilename可以是原来的txt文件，也可以没有然后把写入的自动创建成txt文件
+                # f.write(str(soup))
+                # f.close()
+                information=GongXinBu.information(soup,serialNum,webName,title,has_qualification)
+                ws.append(information)
+                serialNum+=1
+                # f = open(addr+ title + '_我司具有资质.txt', 'w', encoding='utf-8')
+                # f.write(str(has_qualification))
+                # f.close()
+        #保存excel文档
+        wb.save(dir+'每日招标信息'+time.strftime('%Y%m%d',time.localtime())+'.xlsx')
 
     def find_bidding_information(self):
         # 先获得时间数组格式的日期
-        sevenDayAgo = (datetime.datetime.now() - datetime.timedelta(days=7))
+        sevenDayAgo = (datetime.datetime.now() - datetime.timedelta(days=30))
         # 转换为其他字符串格式
         starting_time = sevenDayAgo.strftime('%Y-%m-%d')#获取七天前的日期作为起始时间
         ending_time = time.strftime('%Y-%m-%d', time.localtime())#获取当前时间为终止时间
@@ -174,7 +268,7 @@ class ZhongGuoTieTa:
     def bidding_detail(ids):
         qualification = get_qualification()  # 获取公司资质文档
         # 判断是否存在文件夹，如不存在则创建文件夹，以便存储文档
-        addr = 'E:/招标公告/中国铁塔在线商务平台招标公告/'
+        addr = dir+'中国铁塔在线商务平台招标公告/'
         if not os.path.exists(addr):
             os.makedirs(addr)
         driver_path = r'D:\driver\chromedriver.exe'
@@ -252,7 +346,7 @@ class ZhongGuoDianXin:
     def open_bidding(bidding_informations, titles):
         qualification = get_qualification()  # 获取公司资质文档
         # 判断是否存在文件夹，如不存在则创建文件夹，以便存储文档
-        addr = 'E:/招标公告/中国电信-阳光采购网外部门户招标公告/'
+        addr = dir+'中国电信-阳光采购网外部门户招标公告/'
         if not os.path.exists(addr):
             os.makedirs(addr)
 
@@ -309,8 +403,8 @@ class ZhongGuoDianXin:
         data['endDate'] = ''  # 创建结束日期
         data['docType'] = 'TenderAnnouncement'  # 公告类型   招标公告
         data['paging.start'] = '1'  # 起始位置
-        data['paging.pageSize'] = '100'  # 每页条数
-        data['pageNum'] = '100'  # 每页条数
+        data['paging.pageSize'] = '1000'  # 每页条数
+        data['pageNum'] = '1000'  # 每页条数
         # 请求头
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66',
@@ -359,7 +453,7 @@ class GuangDongJiDian:
     def open_bidding(bidding_informations, titles):
         qualification = get_qualification()  # 获取公司资质文档
         # 判断是否存在文件夹，如不存在则创建文件夹，以便存储文档
-        addr = 'E:/招标公告/广东省机电设备招标公告/'
+        addr = dir+'广东省机电设备招标公告/'
         if not os.path.exists(addr):
             os.makedirs(addr)
 
@@ -440,15 +534,15 @@ if __name__=='__main__':
     gxb=GongXinBu()
     gxb.find_bidding_information()
     print('---------------------------工信部招标公告获取完毕')
-    print('---------------------------开始获取中国铁塔在线商务平台招标文档')
-    zgtt=ZhongGuoTieTa()
-    zgtt.get_biddinglist()
-    print('---------------------------中国铁塔在线商务平台招标公告获取完毕')
-    print('---------------------------开始获取中国电信-阳光采购网外部门户招标文档')
-    zgdx=ZhongGuoDianXin()
-    zgdx.find_bidding_information()
-    print('---------------------------中国电信-阳光采购网外部门户招标公告获取完毕')
-    print('---------------------------开始获取广东省机电设备招标中心招标文档')
-    gdjd=GuangDongJiDian()
-    gdjd.find_bidding_information()
-    print('---------------------------广东省机电设备招标中心招标公告获取完毕')
+    # print('---------------------------开始获取中国铁塔在线商务平台招标文档')
+    # zgtt=ZhongGuoTieTa()
+    # zgtt.get_biddinglist()
+    # print('---------------------------中国铁塔在线商务平台招标公告获取完毕')
+    # print('---------------------------开始获取中国电信-阳光采购网外部门户招标文档')
+    # zgdx=ZhongGuoDianXin()
+    # zgdx.find_bidding_information()
+    # print('---------------------------中国电信-阳光采购网外部门户招标公告获取完毕')
+    # print('---------------------------开始获取广东省机电设备招标中心招标文档')
+    # gdjd=GuangDongJiDian()
+    # gdjd.find_bidding_information()
+    # print('---------------------------广东省机电设备招标中心招标公告获取完毕')

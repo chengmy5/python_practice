@@ -86,9 +86,34 @@ import os
 # res = requests.post(url,data,verify=False,headers=headers)
 # soup = bs4.BeautifulSoup(res.text, 'html.parser')
 # print(soup)
-import re
+# import re
+#
+# a='	沙角A电厂2021年4、5号机组B、C级检修锅炉脱硝系统SCR第一层初装层催化剂更换工作项目（第二次招标）招标公告'
+# regex=re.search("[^\u4e00-\u9fa5]",a)
+# print('\t')
+# print(a.replace(regex.group(),''))
 
-a='	沙角A电厂2021年4、5号机组B、C级检修锅炉脱硝系统SCR第一层初装层催化剂更换工作项目（第二次招标）招标公告'
-regex=re.search("[^\u4e00-\u9fa5]",a)
-print('\t')
-print(a.replace(regex.group(),''))
+# from selenium import webdriver
+#
+# driver_path=r'D:\driver\IEDriverServer.exe'
+# driver=webdriver.Ie(executable_path=driver_path)
+# url="http://baidu.com"
+#
+# driver.get(url)
+# content=driver.page_source
+# print(content)
+
+import openpyxl
+import time
+print(time.strftime('%Y%m%d',time.localtime()))
+# wb=openpyxl.Workbook()
+# ws=wb.active
+# ws.append(['序号','招标网站','项目名称','招标单位','项目概况','报名截止时间','资质要求','招标范围'])
+# wb.save('E:\每日招标信息01.xlsx')
+# wb=openpyxl.open('E:\每日招标信息01.xlsx')
+# ws=wb.active
+# i=0
+# while i<10:
+#     ws.append(['1','工信部','xxx招标项目','xxx科技有限公司','400万','2021-02-05','xxx一级','广东'])
+#     i+=1
+# wb.save('E:\每日招标信息01.xlsx')

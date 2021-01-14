@@ -1,19 +1,18 @@
+import requests as requests
+
+requests.packages.urllib3.disable_warnings()#关闭安全警告
 from selenium import webdriver
 import time
 
-# driver_path=r'D:\driver\IEDriverServer.exe'
-# driver=webdriver.Ie(executable_path=driver_path)
+# chrome_options = webdriver.ChromeOptions()
+# chrome_options.add_argument("-Referer='https://www.https://b2b.10086.cn/b2b/main/showBiao!preShowBiao.html?noticeType=list1'")
 driver_path=r'D:\driver\chromedriver.exe'
 driver=webdriver.Chrome(executable_path=driver_path)
-url="http://www.tower.com.cn/default/main/index/noticedetail.jsp?_operation=notice&_notice=6&_id=402882ac769a385f0176b1a737b74657"
-driver.get(url)
-# time.sleep(5)
-# startTime=driver.find_element_by_name('noticeBean.startDate')
-# startTime.send_keys('2021-01-01')
-# endTime=driver.find_element_by_name('noticeBean.endDate')
-# endTime.send_keys('2021-01-05')
-# search=driver.find_element_by_id('search')
-# search.click()
-# time.sleep(700)
-content=driver.page_source
-print(content)
+url="https://b2b.10086.cn/b2b/main/viewNoticeContent.html?noticeBean.id=727291"
+newwindow='window.open("https://baidu.com");'
+driver.execute_script(newwindow)
+
+# driver.get(url)
+time.sleep(3)
+print(driver.page_source)
+
