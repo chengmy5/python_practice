@@ -82,6 +82,27 @@ class GongXinBu:
 
     @staticmethod
     def information(soup,webName,title,has_qualification):
+        #去除内容中的HTML标签
+        soup=soup.replace('<p class="MsoListParagraph" style="margin-left:28px;line-height:29px">','')
+        soup=soup.replace('<p style="text-indent:35px;line-height:150%">','')
+        soup=soup.replace('<p style="text-indent:32px;line-height:29px">','')
+        soup=soup.replace('<p style="text-indent:32px;line-height:33px">','')
+        soup=soup.replace('<p style="text-indent:28px">','')
+        soup=soup.replace('</p>','')
+        soup=soup.replace('<span style="font-family:宋体">','')
+        soup=soup.replace('<span style="text-decoration:underline;">','')
+        soup=soup.replace('<span style="background:yellow;background:yellow">','')
+        soup=soup.replace('<span style="font-family: 宋体;font-size: 16px">','')
+        soup=soup.replace('<span style=";font-family:宋体;font-size:16px">','')
+        soup=soup.replace('<span style="font-size:16px;font-family:宋体">','')
+        soup=soup.replace('<span style="font-family:Times New Roman">','')
+        soup=soup.replace('<span style=";line-height:115%;font-family:宋体">','')
+        soup=soup.replace('<span style="font-family:宋体;letter-spacing:0">','')
+        soup=soup.replace('<span style="font-size:16px;font-family:仿宋_GB2312">','')
+        soup=soup.replace('<span style=";font-family:宋体;letter-spacing:0;font-size:16px">','')
+        soup=soup.replace('<span style=";font-family:宋体;font-size:14px;background:rgb(255,255,0);background:rgb(255,255,0)">','')
+        soup=soup.replace('</span>','')
+        soup=soup.replace('</strong>','')
         qualification=''
         for each in has_qualification:
             qualification+=each+','
@@ -101,77 +122,64 @@ class GongXinBu:
         information.append(webName)
         information.append(title)
         # 获取招标人/招标代理机构
-        a = soup.find('span', style='font-size:16px;float:right; clear:both;')
-        if a == None:
-            a = soup.find('span', style='font-size: 16px;float:right; clear:both;')
-        if a != None:
-            bidUnit = a.text.split('：')[1]
-        bidPerson=bidUnit.split('/')[0]
-        if len(bidUnit.split('/'))>1:
-            bidUnit=bidUnit.split('/')[1]
-        else:
-            bidUnit=''
+        a = soup.find('招标人为')
+        bidPerson = soup[a+4:soup.find('，',a,a+30)]
+        bidUnit=soup[soup.find('招标代理机构为',a)+7:soup.find('。')]
         information.append(bidPerson)
         information.append(bidUnit)
         # 获取项目概况
         xmgk=['标段划分','标包划分','本项目划分','不划分标包','不划分标段']
         for item in xmgk:
-            b = soup.text.find(item)
+            b = soup.find(item)
             if b!=-1:
                 break
-        c=soup.text.find('。', b, b + 60)
+        c=soup.find('。', b, b + 60)
         if c==-1:
-            c = soup.text.find('，', b, b + 60)
+            c = soup.find('，', b, b + 60)
         if c==-1:
-            c = soup.text.find(' ', b, b + 60)
+            c = soup.find('：', b, b + 60)
+        if c==-1:
+            c = soup.find(' ', b, b + 60)
         if b!=-1:
-            projectOverview=soup.text[b:c]
+            projectOverview=soup[b:c]
         information.append(projectOverview)
         #获取报名截止时间
-        d=soup.text.find('投标截止时间为')
+        d=soup.find('投标截止时间为')
+        if d==-1:
+            d = soup.find('投标截止时间')
+        if d == -1:
+            d = soup.find('投标截止     时间为')
         if d!=-1:
-            d=soup.text.find('2',d,d+15)
-        e = soup.text.find('。', d)
-        endTime=soup.text[d:e]
+            d=soup.find('2',d,d+15)
+        e = soup.find('。', d)
+        endTime=soup[d:e]
         information.append(endTime)
         information.append(qualification)
         #获取招标范围
         zbfw=['招标内容:','招标内容：','招标范围:','招标范围：','采购内容:','采购内容：','项目主要内容：','建设内容：','招标规模及内容：','项目概况：']
         for item in zbfw:
-            f=soup.text.find(item)
+            f=soup.find(item)
             if f!=-1:
                 break
-        g=soup.text.find('。',f,f+255)
+        g=soup.find('。',f,f+255)
         if f!=-1:
-            bidScope=soup.text[f:g]
+            bidScope=soup[f:g]
         information.append(bidScope)
         return information
 
     @staticmethod
-    def open_bidding(bidding_informations,titles):
+    def open_bidding(bidding_informations):
         qualification=get_qualification('我司具有资质')# 获取公司资质文档
         qualification1=get_qualification('同专业高等级资质')# 获取更高资质文档
         #网站
         webName='工信部'
-        JSESSIONID='&JSESSIONID=B401DCA5686E1354B8DA790B46550AD4'#招标公告请求地址中的参数
         for each in bidding_informations:
             # 获取当前招标公告标题
-            title = titles[bidding_informations.index(each)]
+            title = each['bulletinTitle']
             title = update_title(title)
-            each+=JSESSIONID
-            each=each.encode('utf-8')
-            each = str(base64.b64encode(each), 'utf-8')#将地址参数进行utf-8编码
-
-            url = 'http://txzb.miit.gov.cn/DispatchAction.do?_QUERY_STRING='+each  #拼接请求地址
-            #添加请求头
-            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
-                'Cookie': 'JSESSIONID=B401DCA5686E1354B8DA790B46550AD4; _const_cas_from_=favicon.ico'}
-            #发起请求
-            res = requests.post(url, verify=False, headers=headers,stream=True)
-            #接收返回页面
-            soup = bs4.BeautifulSoup(res.text, 'html.parser')
+            text=each['bulletinComment']
             #获取投标人资格要求部分
-            content = str(soup.find_all('div', id='ggdiv2'))
+            content = text[text.find('投标人资格要求'):text.find('资格审查方法')]
             #当前招标公告中我司具有的资质列表
             has_qualification=[]
             for item in qualification:
@@ -182,9 +190,9 @@ class GongXinBu:
             if len(has_qualification)>0:
                 #如果当前招标公告中我司具有的资质列表长度大于0，则将此招标公告以html形式保存，并将当前招标公告中我司具有的资质列表以txt形式保存
                 f = open(dir+title+'.html','w',encoding ='utf-8')  ##ffilename可以是原来的txt文件，也可以没有然后把写入的自动创建成txt文件
-                f.write(str(soup))
+                f.write(text)
                 f.close()
-                information=GongXinBu.information(soup,webName,title,has_qualification)
+                information=GongXinBu.information(text,webName,title,has_qualification)
                 ws.append(information)
             else:
                 for item in qualification1:
@@ -195,9 +203,9 @@ class GongXinBu:
                 if len(has_qualification) > 0:
                     # 如果当前招标公告中我司具有的资质列表长度大于0，则将此招标公告以html形式保存，并将当前招标公告中我司具有的资质列表以txt形式保存
                     f = open(dir1 + title + '.html', 'w',encoding='utf-8')  ##ffilename可以是原来的txt文件，也可以没有然后把写入的自动创建成txt文件
-                    f.write(str(soup))
+                    f.write(text)
                     f.close()
-                    information = GongXinBu.information(soup, webName, title, has_qualification)
+                    information = GongXinBu.information(text, webName, title, has_qualification)
                     ws1.append(information)
         #保存excel文档
         wb.save(dir+'每日招标信息'+time.strftime('%Y%m%d',time.localtime())+'.xlsx')
@@ -211,30 +219,37 @@ class GongXinBu:
         ending_time = time.strftime('%Y-%m-%d', time.localtime())#获取当前时间为终止时间
 
         #请求地址  pagesize=每页展示条数
-        url='http://txzb.miit.gov.cn/DispatchAction.do?reg=denglu&pagesize=1000'
+        url='https://txzbqy.miit.gov.cn/zbtb/gateway/gatewayPublicity/bidBulletinList'
         #请求参数
         data={}
-        data['inqu_status-0-name']=''#搜索标题
-        data['inqu_status-0-date1']=starting_time#起始时间
-        data['inqu_status-0-date2']=ending_time#结束时间
-        data['inqu_status-0-bulletinType']='1'#公告类型（1：招标公告 2：变更公告 3：资格预审公告 4：招标终止公告）
-        data['inqu_status-0-supervisorCode']=''#监管单位编号，对应监管单位
-        data['inqu_status-0-supervisorName']=''#监管单位：xx市通信管理局
-        data['inqu_status-0-bidType']=''#项目类型
-        data['inqu_status-0-unitRestrict']=''#招标人分类：（1、移动:10 2、电信:11 3、联通:12 4、其他:13）
-        data['efFormEname']='POIX14'
-        data['methodName']='initLoad'
+        data['bulletinTitle']=''#标题
+        data['bulletinType']='22'
+        data['fileBuyBeginTime']=''
+        data['fileBuyEndTime']=''
+        data['gatewayFlag']=0
+        data['issueDate']=''
+        data['issueDates']=[]
+        data['limit']=500#每页条数
+        data['occupationBeginDate'] = starting_time  # 发布日期-开始
+        data['occupationEndDate'] = ending_time  # 发布日期-结束
+        data['page']=1#第几页
+        data['resource']=ending_time+' 23:59:59'#文件获取时间
+        data['status']='11'
         #请求头
-        headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36 Edg/87.0.664.66',
-                 'Cookie':'JSESSIONID=B401DCA5686E1354B8DA790B46550AD4; _const_cas_from_=favicon.ico'}
+        headers={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36',
+                 'Content-Type':'application/json;charset=UTF-8',
+                 'Referer':'https://txzbqy.miit.gov.cn/',
+                 'Origin':'https://txzbqy.miit.gov.cn',
+                 'Cookie':'jsessionid=rBQQsBroYJXh75cslLSKJkU_namom_KZUiYA'}
         #发起请求
-        res = requests.post(url,data,verify=False,headers=headers,stream=True)
+        res = requests.post(url,json.dumps(data),verify=False,headers=headers)
         #接收相应页面
-        soup = bs4.BeautifulSoup(res.text, 'html.parser')
-        #在页面中查找各个招标公告
-        bidding_informations=GongXinBu.get_information(soup)
-        #打开招标公告并判断是否符合公司具有资质
-        GongXinBu.open_bidding(bidding_informations[0],bidding_informations[1])
+        # soup = bs4.BeautifulSoup(res.text, 'html.parser')
+        js=res.json()
+        # size=js['page']['totalCount']#总条数
+        bidding_informations=js['page']['list']
+        # #打开招标公告并判断是否符合公司具有资质
+        GongXinBu.open_bidding(bidding_informations)
 
 class ZhongGuoTieTa:
     '''
@@ -1081,19 +1096,19 @@ if __name__=='__main__':
     gxb=GongXinBu()
     gxb.find_bidding_information()
     print('---------------------------工信部招标公告获取完毕')
-    print('---------------------------开始获取中国铁塔在线商务平台招标文档')
-    zgtt=ZhongGuoTieTa()
-    zgtt.get_biddinglist()
-    print('---------------------------中国铁塔在线商务平台招标公告获取完毕')
-    print('---------------------------开始获取中国电信-阳光采购网外部门户招标文档')
-    zgdx=ZhongGuoDianXin()
-    zgdx.find_bidding_information()
-    print('---------------------------中国电信-阳光采购网外部门户招标公告获取完毕')
-    print('---------------------------开始获取广东省有线招标公告')
-    gdyx = GuangDongYouXian()
-    gdyx.find_bidding_information()
-    print('---------------------------广东省有线招标公告获取完毕')
-    print('---------------------------开始获取广东省机电设备招标中心招标文档')
-    gdjd=GuangDongJiDian()
-    gdjd.find_bidding_information()
-    print('---------------------------广东省机电设备招标中心招标公告获取完毕')
+    # print('---------------------------开始获取中国铁塔在线商务平台招标文档')
+    # zgtt=ZhongGuoTieTa()
+    # zgtt.get_biddinglist()
+    # print('---------------------------中国铁塔在线商务平台招标公告获取完毕')
+    # print('---------------------------开始获取中国电信-阳光采购网外部门户招标文档')
+    # zgdx=ZhongGuoDianXin()
+    # zgdx.find_bidding_information()
+    # print('---------------------------中国电信-阳光采购网外部门户招标公告获取完毕')
+    # print('---------------------------开始获取广东省有线招标公告')
+    # gdyx = GuangDongYouXian()
+    # gdyx.find_bidding_information()
+    # print('---------------------------广东省有线招标公告获取完毕')
+    # print('---------------------------开始获取广东省机电设备招标中心招标文档')
+    # gdjd=GuangDongJiDian()
+    # gdjd.find_bidding_information()
+    # print('---------------------------广东省机电设备招标中心招标公告获取完毕')

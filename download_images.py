@@ -50,7 +50,7 @@ def download_images(folder='OOXX',pages=10):
     os.mkdir(folder)
     os.chdir(folder)
 
-    url='http://jandan.net/ooxx'
+    url='http://jandan.net/girl'
     page_num=int(get_page(url))
     for i in range(pages):
         page_num-=i
